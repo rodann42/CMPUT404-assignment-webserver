@@ -50,7 +50,8 @@ class MyWebServer(socketserver.BaseRequestHandler):
         else:
             # get requested path
             relPath = self.data[0].split(' ')[1]
-            absPath = os.path.abspath("www" + relPath)
+            absPath = "www" + os.path.abspath(relPath)
+            print(absPath)
             self.handlePath(absPath, relPath)
 
         print("prepare to send response")
@@ -66,10 +67,11 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 self.location = relPath +'/'
                 self.code = '301\r\n'
                 self.statusMessage = 'Redirect to correct location'
-                return self.sendResponse()
+                return 
 
             # if request end with "/", check index.html
             indexPath = os.path.join(absPath, "index.html")
+            print(indexPath)
             if (os.path.exists(indexPath)):
                 print("indexPath")
                 return self.setResource(indexPath)
@@ -77,16 +79,21 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 print("404 ResourceNotFound")
                 self.code = '404\r\n'
                 self.statusMessage = 'Resource Not Found\r\n\r\n'
-                return self.sendResponse()
+                return
                 # self.request.sendall(bytearray("HTTP/1.1 404 Resource Not Found\r\n\r\n", "utf-8"))
 
-        else:
+        elif os.path.exists(absPath):
             return self.setResource(absPath)
+        else:
+            print("!!!!!!!!!!404 ResourceNotFound")
+            self.code = '404\r\n'
+            self.statusMessage = 'Resource Not Found\r\n\r\n'
+            return
 
 
     def sendResponse(self):
         print("sendResponse")
-        response = 'HTTP/1.1 {}{}{}{}\r\n{}\r\n'.format(self.code, self.statusMessage, self.location, self.contentType, self.content)
+        response = 'HTTP/1.1 {}{}{}{}\r\n{}\r\nConnection: Close\r\n'.format(self.code, self.statusMessage, self.location, self.contentType, self.content)
         self.request.sendall(bytearray(response, 'utf-8'))
 
 
@@ -100,10 +107,6 @@ class MyWebServer(socketserver.BaseRequestHandler):
                     self.contentType = "Content-Type: text/html\r\n"
                 elif (path.endswith(".css")):
                     self.contentType = "Content-Type: text/css\r\n"
-                else:
-                    self.code = "404\r\n"
-                    self.statusMessage = "Resource Not Found! Only Support HTML and CSS mime-Type"
-                    return
                 self.content = buffer
 
         except Exception as e:
