@@ -67,7 +67,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 self.location = relPath +'/'
                 self.code = '301\r\n'
                 self.statusMessage = 'Redirect to correct location'
-                return 
+                return
 
             # if request end with "/", check index.html
             indexPath = os.path.join(absPath, "index.html")
@@ -93,7 +93,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
     def sendResponse(self):
         print("sendResponse")
-        response = 'HTTP/1.1 {}{}{}{}\r\n{}\r\nConnection: Close\r\n'.format(self.code, self.statusMessage, self.location, self.contentType, self.content)
+        response = 'HTTP/1.1 {}{}{}{}\r\n{}\r\n'.format(self.code, self.statusMessage, self.location, self.contentType, self.content)
         self.request.sendall(bytearray(response, 'utf-8'))
 
 
